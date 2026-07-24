@@ -19,6 +19,7 @@ OUT = ROOT / "data.json"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) D1BaseballNews/1.0"}
 HOME_POST_COUNT = 5
 DETAIL_POST_COUNT = 15
+BLOCKED_PUBLISHERS = {"mshale"}
 
 # Google News searches are intentionally scoped to each league.  The final
 # title check keeps general football/basketball stories out of this dashboard.
@@ -112,6 +113,9 @@ def news_posts(section: dict) -> list[dict]:
         for item in root.findall(".//item"):
             raw_title = clean(item.findtext("title") or "Untitled")
             title = re.sub(r"\s+-\s+[^-]+$", "", raw_title)
+            publisher = clean(item.findtext("source") or "").lower()
+            if publisher in BLOCKED_PUBLISHERS:
+                continue
             if not any(keyword in title.lower() for keyword in section["keywords"]):
                 continue
             url = (item.findtext("link") or "").strip()
