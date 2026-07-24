@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+server.py
+gators-logo.png
+yankees-logo.gif
+yankees-logo.png

@@ -1,0 +1,32 @@
+name: Refresh Division I baseball newsroom
+
+on:
+  schedule:
+    # 13:00 UTC is 9:00 AM Eastern Daylight Time. Adjust to 14:00 UTC after DST ends.
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the dashboard
+        uses: actions/checkout@v4
+
+      - name: Refresh article data
+        run: python3 refresh.py
+
+      - name: Commit updated digest when changed
+        run: |
+          if git diff --quiet -- data.json; then
+            echo "No article changes to publish."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "chore: refresh Division I baseball newsroom"
+          git push
