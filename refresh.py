@@ -104,28 +104,28 @@ def date_value(raw: str) -> str:
 
 
 def news_posts(section: dict) -> list[dict]:
-    params = {"q": f"{section['query']} when:90d", "hl": "en-US", "gl": "US", "ceid": "US:en"}
-    root = ET.fromstring(fetch("https://news.google.com/rss/search?" + urllib.parse.urlencode(params)))
+    """Prefer the recent window, then fill from 90-day coverage if necessary."""
     posts, seen = [], set()
-    for item in root.findall(".//item"):
-        raw_title = clean(item.findtext("title") or "Untitled")
-        title = re.sub(r"\s+-\s+[^-]+$", "", raw_title)
-        if not any(keyword in title.lower() for keyword in section["keywords"]):
-            continue
-        url = (item.findtext("link") or "").strip()
-        if not url or url in seen:
-            continue
-        seen.add(url)
-        posts.append({
-            "title": title,
-            "url": url,
-            "published": date_value(item.findtext("pubDate") or ""),
-            "excerpt": clean(item.findtext("description") or "")[:220],
-            "image": "",
-        })
-        if len(posts) == DETAIL_POST_COUNT:
-            break
-    return sorted(posts, key=lambda post: post["published"], reverse=True)
+    for window in (30, 90):
+        params = {"q": f"{section['query']} when:{window}d", "hl": "en-US", "gl": "US", "ceid": "US:en"}
+        root = ET.fromstring(fetch("https://news.google.com/rss/search?" + urllib.parse.urlencode(params)))
+        for item in root.findall(".//item"):
+            raw_title = clean(item.findtext("title") or "Untitled")
+            title = re.sub(r"\s+-\s+[^-]+$", "", raw_title)
+            if not any(keyword in title.lower() for keyword in section["keywords"]):
+                continue
+            url = (item.findtext("link") or "").strip()
+            if not url or url in seen:
+                continue
+            seen.add(url)
+            posts.append({
+                "title": title,
+                "url": url,
+                "published": date_value(item.findtext("pubDate") or ""),
+                "excerpt": clean(item.findtext("description") or "")[:220],
+                "image": "",
+            })
+    return sorted(posts, key=lambda post: post["published"], reverse=True)[:DETAIL_POST_COUNT]
 
 
 def collect(section: dict) -> dict:
