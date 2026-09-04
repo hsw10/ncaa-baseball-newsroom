@@ -187,6 +187,7 @@ def news_posts(section: dict) -> list[dict]:
                     continue
                 seen.add(url)
                 posts.append({
+                    "source": clean(item.findtext("source") or "News source"),
                     "title": title,
                     "url": url,
                     "published": date_value(item.findtext("pubDate") or ""),
