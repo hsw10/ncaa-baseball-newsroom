@@ -13,10 +13,12 @@ import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "data.json"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) D1BaseballNews/1.0"}
+IMAGE_HEADERS = {**HEADERS, "Accept": "text/html,application/xhtml+xml"}
 HOME_POST_COUNT = 5
 DETAIL_POST_COUNT = 15
 BLOCKED_PUBLISHERS = {"mshale"}
@@ -208,6 +210,92 @@ def date_value(raw: str) -> str:
         return (raw or "").strip()
 
 
+def usable_image(url: str) -> bool:
+    lowered = (url or "").lower()
+    return (
+        lowered.startswith(("https://", "http://"))
+        and "googleusercontent.com" not in lowered
+        and "news.google.com" not in lowered
+    )
+
+
+def fallback_image(section: dict, title: str) -> str:
+    """Create a durable branded thumbnail when a publisher image is unavailable."""
+    palette = {
+        "ncaa-baseball": ("#006dae", "#e9f4fb"),
+        "sec": ("#1c2541", "#f3c969"),
+        "acc": ("#005a9c", "#e8f3fb"),
+        "big-ten": ("#001e62", "#f0f4ff"),
+        "big-12": ("#cf1d3b", "#fff0f2"),
+        "mid-major": ("#167a5a", "#e7f7ef"),
+    }
+    dark, light = palette.get(section["slug"], ("#14233a", "#e8eef2"))
+    words = clean(title).replace("&", "and")[:100]
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">'
+        f'<rect width="800" height="450" fill="{dark}"/>'
+        f'<circle cx="690" cy="80" r="170" fill="{light}" opacity=".18"/>'
+        f'<path d="M0 365h800v85H0z" fill="{light}" opacity=".12"/>'
+        f'<text x="48" y="74" fill="{light}" font-family="Arial" font-size="20" font-weight="700" letter-spacing="3">{section["name"].upper()}</text>'
+        f'<text x="48" y="230" fill="white" font-family="Georgia" font-size="30" font-weight="700">{words}</text>'
+        f'<text x="48" y="405" fill="{light}" font-family="Arial" font-size="16" letter-spacing="2">COLLEGE BASEBALL NEWSROOM</text></svg>'
+    )
+    return "data:image/svg+xml," + quote(svg)
+
+
+def article_image(url: str) -> str:
+    """Extract a publisher image from Open Graph or Twitter metadata."""
+    try:
+        request = urllib.request.Request(url, headers=IMAGE_HEADERS)
+        with urllib.request.urlopen(request, timeout=20) as response:
+            page_url = response.geturl()
+            body = response.read(500_000).decode("utf-8", "replace")
+        candidates = []
+        for pattern in (
+            r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)',
+            r'<meta[^>]+name=["\']twitter:image(?::src)?["\'][^>]+content=["\']([^"\']+)',
+            r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image(?::secure_url)?["\']',
+            r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']twitter:image(?::src)?["\']',
+        ):
+            candidates.extend(re.findall(pattern, body, re.I))
+        for candidate in candidates:
+            resolved = urllib.parse.urljoin(page_url, html_lib.unescape(candidate.strip()))
+            if usable_image(resolved):
+                return resolved
+    except Exception:
+        pass
+    return ""
+
+
+def resolve_article_url(url: str) -> str:
+    """Resolve a Google News redirect to the publisher's canonical article URL."""
+    try:
+        request = urllib.request.Request(url, headers=IMAGE_HEADERS)
+        with urllib.request.urlopen(request, timeout=20) as response:
+            final_url = response.geturl()
+            if final_url.startswith("https://news.google.com/"):
+                body = response.read(700_000).decode("utf-8", "replace")
+                canonical = re.search(r'<link[^>]+rel=["\']canonical["\'][^>]+href=["\']([^"\']+)', body, re.I)
+                if canonical and not canonical.group(1).startswith("https://news.google.com/"):
+                    return html_lib.unescape(canonical.group(1))
+            return final_url
+    except Exception:
+        return url
+
+
+def add_images(posts: list[dict]) -> list[dict]:
+    """Resolve selected article thumbnails concurrently without failing refresh."""
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = {pool.submit(resolve_article_url, post["url"]): post for post in posts}
+        for future in as_completed(futures):
+            post = futures[future]
+            post["url"] = future.result()
+        futures = {pool.submit(article_image, post["url"]): post for post in posts}
+        for future in as_completed(futures):
+            futures[future]["image"] = future.result()
+    return posts
+
+
 def news_posts(section: dict) -> list[dict]:
     """Prefer the recent window, then fill from 90-day coverage if necessary."""
     posts, seen = [], set()
@@ -237,7 +325,12 @@ def news_posts(section: dict) -> list[dict]:
                     "excerpt": clean(item.findtext("description") or "")[:220],
                     "image": "",
                 })
-    return sorted(posts, key=lambda post: post["published"], reverse=True)[:DETAIL_POST_COUNT]
+    selected = sorted(posts, key=lambda post: post["published"], reverse=True)[:DETAIL_POST_COUNT]
+    selected = add_images(selected)
+    for post in selected:
+        if not usable_image(post.get("image", "")):
+            post["image"] = fallback_image(section, post["title"])
+    return selected
 
 
 def collect(section: dict) -> dict:
