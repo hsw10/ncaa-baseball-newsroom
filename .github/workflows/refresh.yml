@@ -1,9 +1,6 @@
 name: Refresh Division I baseball newsroom
 
 on:
-  schedule:
-    # 13:00 UTC is 8:00 AM Eastern Standard Time (9:00 AM during EDT).
-    - cron: '0 13 * * *'
   workflow_dispatch:
 
 permissions:

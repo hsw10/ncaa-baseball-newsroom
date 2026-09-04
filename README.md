@@ -6,7 +6,7 @@ Each section displays five current, topical stories from a conference-specific G
 
 ## Refreshes
 
-- GitHub Actions refreshes `data.json` daily at 13:00 UTC: 8:00 AM EST (9:00 AM EDT).
+- Automatic refreshes are disabled. Use **Scan & update** on the dashboard, sign in to GitHub, and select **Run workflow** to scan and publish the latest stories.
 - The page itself is hosted through GitHub Pages.
 
 ## Local preview
