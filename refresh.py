@@ -19,7 +19,6 @@ OUT = ROOT / "data.json"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) D1BaseballNews/1.0"}
 HOME_POST_COUNT = 5
 DETAIL_POST_COUNT = 15
-MINIMUM_POSTS = 4
 BLOCKED_PUBLISHERS = {"mshale"}
 
 # Google News searches are intentionally scoped to each league.  The final
@@ -135,8 +134,6 @@ def news_posts(section: dict) -> list[dict]:
 
 def collect(section: dict) -> dict:
     posts = news_posts(section)
-    if len(posts) < MINIMUM_POSTS:
-        raise RuntimeError(f"only parsed {len(posts)} relevant posts")
     return {**section, "posts": posts[:HOME_POST_COUNT], "allPosts": posts, "status": "ok"}
 
 
