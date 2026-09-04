@@ -23,6 +23,7 @@ BLOCKED_PUBLISHERS = {"mshale"}
 BLOCKED_TITLE_PATTERNS = (
     re.compile(r"^baseball\s+(?:vs\.?|at)\b", re.I),
     re.compile(r"(?:ticket central|d1baseball\s+x|x\s+d1baseball)", re.I),
+    re.compile(r"(?:pro debut|pro ball|baseball cards|collectibles|minor league|usa baseball|18u training|open tryouts|cape cod|engulfed in flames|smoke plume|baseball schedule|baseball tournament|volleyball|fantasy baseball|dynasty rankings)", re.I),
     re.compile(r"^[^:]+\s+-\s+baseball(?:\s|$)", re.I),
 )
 ACC_SOURCE_QUERIES = (
@@ -54,6 +55,47 @@ ACC_SOURCE_QUERIES = (
     'site:insidecarolina.com North Carolina baseball',
     'site:packpride.com NC State baseball',
     'site:stingtalk.com Georgia Tech baseball',
+)
+
+MID_MAJOR_SOURCE_QUERIES = (
+    '"mid-major baseball"',
+    '"AAC baseball"',
+    '"Sun Belt baseball"',
+    '"Conference USA baseball"',
+    '"WCC baseball"',
+    '"Mountain West baseball"',
+    '"Missouri Valley baseball"',
+    '"Coastal Athletic Association baseball"',
+    '"Southern Conference baseball"',
+    '"Big South baseball"',
+    '"Atlantic 10 baseball"',
+    '"ASUN baseball"',
+    '"Horizon League baseball"',
+    '"Ivy League baseball"',
+    '"Patriot League baseball"',
+    '"Northeast Conference baseball"',
+    '"Ohio Valley baseball"',
+    '"Southland baseball"',
+    '"Summit League baseball"',
+    'site:d1baseball.com mid-major baseball',
+    'site:baseballamerica.com mid-major baseball',
+    'site:theamerican.org baseball',
+    'site:sunbeltsports.org baseball',
+    'site:conferenceusa.com baseball',
+    'site:wccsports.com baseball',
+    'site:themw.com baseball',
+    'site:mvc-sports.com baseball',
+    'site:caasports.com baseball',
+    'site:soconsports.com baseball',
+    'site:bigsouthsports.com baseball',
+    'site:atlantic10.com baseball',
+    'site:asunsports.org baseball',
+    'site:horizonleague.org baseball',
+    'site:ivyleague.com baseball',
+    'site:patriotleague.org baseball',
+    'site:ovcsports.com baseball',
+    'site:southland.org baseball',
+    'site:thesummitleague.org baseball',
 )
 
 SEC_SOURCE_QUERIES = (
@@ -140,6 +182,7 @@ SECTIONS = [
         "slug": "mid-major",
         "url": "https://d1baseball.com/",
         "query": '("mid-major baseball" OR "AAC baseball" OR "Sun Belt baseball" OR "Conference USA baseball" OR "WCC baseball")',
+        "sourceQueries": MID_MAJOR_SOURCE_QUERIES,
         "keywords": ("baseball", "mlb draft", "college world series"),
         "logo": "https://d1baseball.com/favicon.ico",
         "accent": "#167a5a",
