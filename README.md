@@ -26,3 +26,7 @@ Article cards are sourced from conference-specific Google News searches and link
 ### SEC coverage sources
 
 The SEC section combines league-wide reporting from SEC Sports, D1Baseball, Baseball America, WholeHogSports, and The Advocate with official baseball coverage from all 16 member programs: Alabama, Arkansas, Auburn, Florida, Georgia, Kentucky, LSU, Ole Miss, Mississippi State, Missouri, Oklahoma, South Carolina, Tennessee, Texas, Texas A&M, and Vanderbilt.
+
+### ACC coverage sources
+
+The ACC section combines ACC Sports, D1Baseball, Baseball America, ESPN, and established team-beat coverage with official baseball coverage from all current ACC baseball members: Boston College, California, Clemson, Duke, Florida State, Georgia Tech, Louisville, Miami, North Carolina, NC State, Notre Dame, Pittsburgh, Stanford, Virginia, Virginia Tech, and Wake Forest.

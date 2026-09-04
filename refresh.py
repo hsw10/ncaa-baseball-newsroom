@@ -22,7 +22,40 @@ DETAIL_POST_COUNT = 15
 BLOCKED_PUBLISHERS = {"mshale"}
 BLOCKED_TITLE_PATTERNS = (
     re.compile(r"^baseball\s+(?:vs\.?|at)\b", re.I),
+    re.compile(r"(?:ticket central|d1baseball\s+x|x\s+d1baseball)", re.I),
+    re.compile(r"^[^:]+\s+-\s+baseball(?:\s|$)", re.I),
 )
+ACC_SOURCE_QUERIES = (
+    '"ACC baseball"',
+    'site:d1baseball.com ACC baseball',
+    'site:baseballamerica.com ACC baseball',
+    'site:espn.com ACC college baseball',
+    'site:theacc.com baseball',
+    # Every current ACC baseball member with an official athletics source.
+    'site:bceagles.com baseball',
+    'site:calbears.com baseball',
+    'site:clemsontigers.com baseball',
+    'site:goduke.com baseball',
+    'site:seminoles.com baseball',
+    'site:ramblinwreck.com baseball',
+    'site:gocards.com baseball',
+    'site:miamihurricanes.com baseball',
+    'site:goheels.com baseball',
+    'site:gopack.com baseball',
+    'site:und.com baseball',
+    'site:pittsburghpanthers.com baseball',
+    'site:stanfordcardinal.com baseball',
+    'site:virginiasports.com baseball',
+    'site:hokiesports.com baseball',
+    'site:wakeforestsports.com baseball',
+    # Additional established ACC team/beat coverage.
+    'site:bcinterruption.com Boston College baseball',
+    'site:theclemsoninsider.com Clemson baseball',
+    'site:insidecarolina.com North Carolina baseball',
+    'site:packpride.com NC State baseball',
+    'site:stingtalk.com Georgia Tech baseball',
+)
+
 SEC_SOURCE_QUERIES = (
     '"SEC baseball"',
     'site:d1baseball.com SEC baseball',
@@ -76,6 +109,7 @@ SECTIONS = [
         "slug": "acc",
         "url": "https://theacc.com/sports/baseball",
         "query": '"ACC baseball"',
+        "sourceQueries": ACC_SOURCE_QUERIES,
         "keywords": ("baseball", "mlb draft", "college world series"),
         "logo": "https://theacc.com/favicon.ico",
         "accent": "#005a9c",
