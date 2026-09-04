@@ -29,4 +29,4 @@ The SEC section combines league-wide reporting from SEC Sports, D1Baseball, Base
 
 ### ACC coverage sources
 
-The ACC section combines ACC Sports, D1Baseball, Baseball America, ESPN, and established team-beat coverage with official baseball coverage from all current ACC baseball members: Boston College, California, Clemson, Duke, Florida State, Georgia Tech, Louisville, Miami, North Carolina, NC State, Notre Dame, Pittsburgh, Stanford, Virginia, Virginia Tech, and Wake Forest.
+The ACC section combines ACC Sports, D1Baseball, Baseball America, ESPN, and established team-beat coverage with official baseball coverage from all 16 current ACC baseball programs: Boston College, California, Clemson, Duke, Florida State, Georgia Tech, Louisville, Miami, North Carolina, NC State, Notre Dame, Pittsburgh, Stanford, Virginia, Virginia Tech, and Wake Forest. (SMU and Syracuse are ACC members but do not sponsor varsity baseball.)
