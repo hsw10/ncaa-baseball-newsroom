@@ -20,6 +20,32 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) D1Base
 HOME_POST_COUNT = 5
 DETAIL_POST_COUNT = 15
 BLOCKED_PUBLISHERS = {"mshale"}
+BLOCKED_TITLE_PATTERNS = (
+    re.compile(r"^baseball\s+(?:vs\.?|at)\b", re.I),
+)
+SEC_SOURCE_QUERIES = (
+    '"SEC baseball"',
+    'site:d1baseball.com SEC baseball',
+    'site:baseballamerica.com SEC baseball',
+    'site:wholehogsports.com Arkansas baseball',
+    'site:theadvocate.com LSU baseball',
+    'site:rolltide.com Alabama baseball',
+    'site:arkansasrazorbacks.com baseball',
+    'site:auburntigers.com baseball',
+    'site:floridagators.com baseball',
+    'site:georgiadogs.com baseball',
+    'site:ukathletics.com baseball',
+    'site:lsusports.net baseball',
+    'site:olemisssports.com baseball',
+    'site:hailstate.com baseball',
+    'site:mutigers.com baseball',
+    'site:soonersports.com baseball',
+    'site:gamecocksonline.com baseball',
+    'site:utsports.com baseball',
+    'site:texaslonghorns.com baseball',
+    'site:12thman.com baseball',
+    'site:vucommodores.com baseball',
+)
 
 # Google News searches are intentionally scoped to each league.  The final
 # title check keeps general football/basketball stories out of this dashboard.
@@ -39,6 +65,7 @@ SECTIONS = [
         "slug": "sec",
         "url": "https://www.secsports.com/sport/baseball",
         "query": '"SEC baseball"',
+        "sourceQueries": SEC_SOURCE_QUERIES,
         "keywords": ("baseball", "mlb draft", "college world series"),
         "logo": "sec-logo.svg",
         "accent": "#1c2541",
@@ -108,27 +135,30 @@ def news_posts(section: dict) -> list[dict]:
     """Prefer the recent window, then fill from 90-day coverage if necessary."""
     posts, seen = [], set()
     for window in (30, 90):
-        params = {"q": f"{section['query']} when:{window}d", "hl": "en-US", "gl": "US", "ceid": "US:en"}
-        root = ET.fromstring(fetch("https://news.google.com/rss/search?" + urllib.parse.urlencode(params)))
-        for item in root.findall(".//item"):
-            raw_title = clean(item.findtext("title") or "Untitled")
-            title = re.sub(r"\s+-\s+[^-]+$", "", raw_title)
-            publisher = clean(item.findtext("source") or "").lower()
-            if publisher in BLOCKED_PUBLISHERS:
-                continue
-            if not any(keyword in title.lower() for keyword in section["keywords"]):
-                continue
-            url = (item.findtext("link") or "").strip()
-            if not url or url in seen:
-                continue
-            seen.add(url)
-            posts.append({
-                "title": title,
-                "url": url,
-                "published": date_value(item.findtext("pubDate") or ""),
-                "excerpt": clean(item.findtext("description") or "")[:220],
-                "image": "",
-            })
+        for query in section.get("sourceQueries", (section["query"],)):
+            params = {"q": f"{query} when:{window}d", "hl": "en-US", "gl": "US", "ceid": "US:en"}
+            root = ET.fromstring(fetch("https://news.google.com/rss/search?" + urllib.parse.urlencode(params)))
+            for item in root.findall(".//item"):
+                raw_title = clean(item.findtext("title") or "Untitled")
+                title = re.sub(r"\s+-\s+[^-]+$", "", raw_title)
+                publisher = clean(item.findtext("source") or "").lower()
+                if publisher in BLOCKED_PUBLISHERS:
+                    continue
+                if any(pattern.search(title) for pattern in BLOCKED_TITLE_PATTERNS):
+                    continue
+                if not any(keyword in title.lower() for keyword in section["keywords"]):
+                    continue
+                url = (item.findtext("link") or "").strip()
+                if not url or url in seen:
+                    continue
+                seen.add(url)
+                posts.append({
+                    "title": title,
+                    "url": url,
+                    "published": date_value(item.findtext("pubDate") or ""),
+                    "excerpt": clean(item.findtext("description") or "")[:220],
+                    "image": "",
+                })
     return sorted(posts, key=lambda post: post["published"], reverse=True)[:DETAIL_POST_COUNT]
 
 

@@ -22,3 +22,7 @@ The hosted GitHub Pages site is read-only; its data is refreshed by the workflow
 ## Sources
 
 Article cards are sourced from conference-specific Google News searches and link directly to their original publishers. Conference logos and article imagery remain property of their respective owners.
+
+### SEC coverage sources
+
+The SEC section combines league-wide reporting from SEC Sports, D1Baseball, Baseball America, WholeHogSports, and The Advocate with official baseball coverage from all 16 member programs: Alabama, Arkansas, Auburn, Florida, Georgia, Kentucky, LSU, Ole Miss, Mississippi State, Missouri, Oklahoma, South Carolina, Tennessee, Texas, Texas A&M, and Vanderbilt.
